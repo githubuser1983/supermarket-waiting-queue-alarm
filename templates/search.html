@@ -1,0 +1,136 @@
+<html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="//cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
+    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.js"></script>
+    <script type="text/javascript" src="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+</head>
+
+<b>{{ form.autocomp.label }}:</b> 
+<p/>
+{{ form.autocomp }}
+
+<p/>
+<b id="choose"></b>
+
+    <table id="prods" class="display" style="width:100%"> 
+    <thead> 
+        <tr>
+             <td>Warteschlange melden</td>
+             <td>Supermarkt</td>
+             <td>Anzahl Meldungen in der letzten Stunde</td>
+        </tr>
+    </thead>
+    <tbody></tbody>
+    </table>
+
+<script>
+    var mysupermarkt = [];
+    var myprodname = [];
+    var myprodprice = [];
+    var myprodcheaper = [];
+    var sumprodprice = 0.0;
+    var sumprodcheaper = 0.0;
+
+    var supermarkt = [];
+    var prodname = [];
+    var prodprice = [];
+    var prodcheaper = [];
+
+
+    $(document).ready(function() {
+    $('#prods').DataTable();
+    } );
+
+    function increaseCounter(id){
+      mysupermarkt.push(supermarkt[id]);
+      myprodname.push(prodname[id]);
+      myprodprice.push(prodprice[id]);
+      myprodcheaper.push(prodcheaper[id]);
+      sumprodprice += parseFloat(prodprice[id]);
+      sumprodcheaper += prodcheaper[id];
+    }
+
+    function printList(){
+        var t = $('#prods').DataTable( );
+        t.clear().draw(); /** remove all rows from table**/
+        $("#choose").text("");
+        var mylist = $('#mylist');
+        var listitems = mylist.children('li').get();
+        listitems.sort(function(a, b) {
+                return $(a).text().toUpperCase().localeCompare($(b).text().toUpperCase());
+        })
+        $.each(listitems, function(idx, itm) { mylist.append(itm); });
+    }
+
+    $(function() {
+        $.ajax({
+            url: '{{ url_for("autocomplete") }}'
+            }).done(function (data){
+                $('#city_autocomplete').autocomplete({
+                    source: data,
+                    minLength: 1,
+                    autoFocus:true,
+                    select: function(event,ui) {
+                       
+                     $("#choose").text("");
+                     var myData = ui.item.value;
+                     /**$("#prods").html(""); /** delete previous products**/
+                     supermarkt = [];
+                     prodname = [];
+                     prodprice = [];
+                     prodcheaper = [];
+                     var t = $('#prods').DataTable();
+                     t.clear(); /** remove all rows from table**/
+
+                     $.post("/receivedata", 
+                                    {"myData": myData},
+                          function( prods ) {
+                             $.each(prods, function(index,value){ 
+                                t.row.add( 
+                                    [ '<button type="button" onclick="increaseCounter('+index+');">+1</button>',
+                                      value[0],
+                                      value[1]
+                                    ]
+                                ).draw();     
+                                /**$("#prods").append($("<tr><td><button type = 'button' id = '" + index + "' onclick='addToList("+index+");'>+</button> </td> <td>" + value[0]+"</td><td>" + value[1]+"</td><td>"+value[2]+"</td><td> "+value[3]+"</td></tr>"));      **/
+                                supermarkt.push(value[0]);
+                                prodname.push(value[1]);
+                                prodprice.push(value[2]);
+                                prodcheaper.push(value[3]);                                     
+                             });
+                          }
+                          
+                     );
+      
+
+ 
+				var originalEvent = event,
+					input__event_type = '',
+					input__selection_type = '';
+
+				while ( originalEvent ) {
+                                      if ( originalEvent.keyCode === 13 ) {
+						originalEvent.stopPropagation();
+					}
+					if ( originalEvent === event.originalEvent ) {
+						break;
+					}
+					originalEvent = event.originalEvent;
+				}
+
+				input__event_type = originalEvent.type;
+				
+				if ( input__event_type === 'menuselect' ) { // selected by keyboard instead of mouse/touch
+					input__selection_type = 'menuselect'
+				}
+                            /*DEBUG AUTOCOMPLETE*/console.log( 'DEBUG - AUTOCOMPLETE - SELECT EVENT IS', input__event_type );
+                   }
+                });
+            });
+        });
+</script>
+</html>
