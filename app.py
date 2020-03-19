@@ -44,7 +44,7 @@ class Supermarket:
     def delete_old_warnings(self,seconds = 60*60):
         n = datetime.datetime.now()
         print([str(x) for x in self.list_of_warnings])
-        self.list_of_warnings = [w for w in self.list_of_warnings if (n-w.dtime).total_seconds() > seconds]
+        self.list_of_warnings = [w for w in self.list_of_warnings if (n-w.dtime).total_seconds() <= seconds]
 
 dict_of_supermarkets = dict([ ( ("65549",supermarket), Supermarket("65549",supermarket) ) for supermarket in supermaerkte])
         
@@ -106,7 +106,7 @@ def receive_data():
 
 if __name__ == '__main__':
     logging.basicConfig(filename="log.txt",level=logging.INFO)
-    STAGE = "DEV"
+    STAGE = "" #"DEV"
     if STAGE == "DEV":
         app.run(host='0.0.0.0',port=5000)
     else:

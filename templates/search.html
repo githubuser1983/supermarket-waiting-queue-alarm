@@ -28,18 +28,9 @@
     </table>
 
 <script>
-    var mysupermarkt = [];
-    var myprodname = [];
-    var myprodprice = [];
-    var myprodcheaper = [];
-    var sumprodprice = 0.0;
-    var sumprodcheaper = 0.0;
     var plz;
     var supermarkt = [];
-    var prodname = [];
-    var prodprice = [];
-    var prodcheaper = [];
-
+    var warnings = []
 
     $(document).ready(function() {
     $('#prods').DataTable();
@@ -47,8 +38,11 @@
 
     function sendWarning(id,plz){
       data = { "supermarket": supermarkt[id], "location" : plz };
-      $.ajax({ url: "/warn",type : "POST", data:data
-              }).query();
+      $.ajax({ url: "/warn",type : "POST", data:data});
+      warnings[id] +=1;
+      var t = $('#prods').DataTable();
+      var idx = t.row(id).index();
+      t.cell(idx,2).data(t.cell(idx,2).data()+1).draw();
     }
 
     $(function() {
@@ -65,9 +59,7 @@
                      var plz = ui.item.value;
                      /**$("#prods").html(""); /** delete previous products**/
                      supermarkt = [];
-                     prodname = [];
-                     prodprice = [];
-                     prodcheaper = [];
+                     warnings = [];
                      var t = $('#prods').DataTable();
                      t.clear(); /** remove all rows from table**/
 
@@ -83,9 +75,7 @@
                                 ).draw();     
                                 /**$("#prods").append($("<tr><td><button type = 'button' id = '" + index + "' onclick='addToList("+index+");'>+</button> </td> <td>" + value[0]+"</td><td>" + value[1]+"</td><td>"+value[2]+"</td><td> "+value[3]+"</td></tr>"));      **/
                                 supermarkt.push(value[0]);
-                                prodname.push(value[1]);
-                                prodprice.push(value[2]);
-                                prodcheaper.push(value[3]);                                     
+                                warnings.push(value[1]);
                              });
                           }
                           
