@@ -1,5 +1,6 @@
 <html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Warteschlangen-Alarm vor Supermarkt durch Corona</title>
 <head>
     <meta charset="utf-8">
     <link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
@@ -7,6 +8,43 @@
     <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.js"></script>
     <script type="text/javascript" src="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    
+<style type="text/css">
+ 
+/** Social Button CSS **/
+
+.share-btn {
+  display: inline-block;
+  color: #ffffff;
+  border: none;
+  padding: 0.1em 0.6em;
+  outline: none;
+  text-align: center;
+  font-size: 0.9em;
+  margin: 0 0.2em;
+}
+
+.share-btn:focus,
+.share-btn:hover {
+  text-decoration: none;
+  opacity: 0.8;
+}
+
+.share-btn:active {
+  color: #e2e2e2;
+}
+
+.share-btn.whatsapp { background: #00ff00; }
+.share-btn.twitter { background: #55acee; }
+.share-btn.google-plus { background: #dd4b39; }
+.share-btn.facebook { background: #3B5998; }
+.share-btn.stumbleupon { background: #EB4823; }
+.share-btn.reddit { background: #ff5700; }
+.share-btn.hackernews { background: #ff6600; }
+.share-btn.linkedin    { background: #4875B4; }
+.share-btn.email { background: #444444; }
+ 
+</style>
 </head>
 
 <b>{{ form.autocomp.label }}:</b> 
@@ -33,7 +71,7 @@
     var warnings = []
 
     $(document).ready(function() {
-    $('#prods').DataTable();
+    $('#prods').DataTable({"language": {"url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/German.json"}});
     } );
 
     function sendWarning(id,plz){
@@ -51,7 +89,7 @@
             }).done(function (data){
                 $('#city_autocomplete').autocomplete({
                     source: data,
-                    minLength: 1,
+                    minLength: 3,
                     autoFocus:true,
                     select: function(event,ui) {
                        
@@ -108,4 +146,17 @@
             });
         });
 </script>
+<div id="share-buttons">
+    
+    <a href="whatsapp://send?text=Warteschlangen-Alarm vor Supermarkt durch Corona http://www.orges-leka.de/limburg.html" class="share-btn whatsapp">Whatsapp</a>
+<!--    <a href="..." class="share-btn twitter">Twitter</a>
+<a href="..." class="share-btn facebook">Facebook</a>
+<a href="..." class="share-btn reddit">Reddit</a>
+<a href="..." class="share-btn hackernews">Hacker News</a>
+<a href="..." class="share-btn linkedin">LinkedIn</a>
+<a href="..." class="share-btn email">Email</a>--!>
+
+    
+
+</div>
 </html>
