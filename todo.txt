@@ -1,0 +1,7 @@
+mögliche Ideen:
+
+* Openstreetmap daten nutzen um eine Liste mit PLZ,Supermarktnamen zu erstellen.
+* User wählt PLZ und es erscheinen Supermärkte in dieser PLZ.
+* Refresh Button einbauen um aktuelle Warnungen anzuzeigen
+* Sqlite einbauen um Warnungen für spätere Analysen zu speichern 
+* Weitere Spalten hinzufügen, Anzahl der Meldungen in den letzten 4 Std., Anzahl der Meldungen in den letzten 24 h.
