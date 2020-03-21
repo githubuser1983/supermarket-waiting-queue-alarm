@@ -4,6 +4,7 @@
     <link rel="stylesheet" href="https://bootswatch.com/4/slate/bootstrap.min.css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
+    <script src="static/js/debounce.js"></script>
     <link rel="stylesheet" href="static/css/font-awesome.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -53,7 +54,7 @@
                 <div class="card-header">
                     <div class="form-group has-search">
                         <span class="fa fa-search form-control-feedback"></span>
-                        <input type="text" class="form-control" placeholder="Search" id="search" name="search" disabled>
+                        <input type="text" class="form-control" placeholder="Search" id="search" name="search">
                     </div>
                 </div>
                 <div id="data-container" class="card-body data-container">
@@ -75,6 +76,9 @@
         $(plz).on('input', function () {
             onPlzChange();
         });
+
+        $(search).keyup( $.debounce( 800, onPlzChange ) );
+
 
         $.validator.setDefaults({
             submitHandler: function () {
@@ -171,13 +175,11 @@
 
         function loadData() {
             page = 0;
-            data($("#plz"). val(),"",false)
+            data($("#plz"). val(),$("#search").val(),false)
         }
 
 
         function addDataToDataContainer(data, append) {
-            console.log(append)
-            console.log(data)
             if (data.length == 0) {
                 end = true;
                 $("#data-container").append(`${elementCount}/${elementCount} Einträgen`);
@@ -207,14 +209,14 @@
 
 
         function data(postcode,search,append) {
-            console.log(append)
             $.ajax({
                 url: "receivedata",
                 type: "get", //send it through get method
                 data: {
                     "page": page,
                     "size": 5,
-                    "postcode": postcode
+                    "postcode": postcode,
+                    "search": search
                 },
                 success: function (response) {
                     addDataToDataContainer(response,append)
@@ -274,7 +276,7 @@
                 load = true;
                 $("#data-container").append("Daten werden geladen...");
                 page = page + 1;
-                data($("#plz").val(),"",true)
+                data($("#plz").val(),$("#search").val(),true)
             }
         });
 

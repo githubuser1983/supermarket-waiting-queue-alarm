@@ -121,13 +121,20 @@ def receive_data():
     postcode = int(request.args.get('postcode'))
     fromPos = page * size
     toPos = ((page + 1)*size)
-    print(fromPos)
-    print(toPos)
-   
 
+    searchSplit = []
+    if (search != None) :
+        searchSplit = search.lower().split()
     ll = []
     for markt in supermarkets:
-        if (postcode == markt.postcode): 
+        found = True
+        searchMarket = (markt.name+markt.adress).lower()
+        if len(searchSplit) > 0:
+            for searchSplitEntry in searchSplit:
+                if not searchMarket.__contains__(searchSplitEntry):
+                    found = False
+
+        if (postcode == markt.postcode and found): 
             ll.append({ "id":markt.id , "name":markt.name, "adress":markt.adress,"waiting_queue_last_hour":markt.list_of_warnings.__len__(),"waiting_queue_last_24_hour":markt.list_of_warnings.__len__()})
 
     if (len(ll) < fromPos or len(ll) == 0):
