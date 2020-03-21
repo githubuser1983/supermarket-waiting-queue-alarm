@@ -30,6 +30,9 @@
             background-color: #272B30;
             padding: 0px;
         }
+        .data-element{
+            margin-top: 0.2em;
+        }
     </style>
 
 </head>
@@ -72,6 +75,8 @@
 
     <script>
         var page = -1;
+        var end = false;
+        var elementCount = 0;
 
 
         $(plz).on('input', function () {
@@ -139,6 +144,8 @@
 
 
         function onPlzChange() {
+            elementCount = 0
+            end = false;
             if ($("#filterform").valid()) {
                 loadDataInit();
                 $("#results").show();
@@ -162,9 +169,13 @@
 
 
         function addDataToDataContainer(data, append) {
+            if(data.length == 0){
+                end = true;
+                $("#data-container").append(`${elementCount}/${elementCount} Einträgen`);
+            }
             var html = ""
             for (index = 0; index < data.length; index++) {
-                html += `<div class="card"><div class=\"card-body\">`
+                html += `<div class="card data-element"><div class=\"card-body\">`
                 html += `<p>${data[index].name}<br/>`
                 html += `${data[index].adress}<br/>`
                 html += `Anzahl Warnung 1h:${data[index].waiting_queue_last_hour}<br/>`
@@ -175,16 +186,22 @@
             if (append) {
                 $("#data-container").html($("#data-container").html().replace("Daten werden geladen...",""));
                 $("#data-container").append(html);
+                elementCount = elementCount+data.length;
 
             }
             else {
                 $("#data-container").html(html);
+                elementCount = data.length;
             }
 
         }
 
 
         function mockData() {
+            if(page == 5){
+                return [];
+            }
+
             return [{
                 "id": 1,
                 "name": `Rewe1 ${page}`,
@@ -219,6 +236,9 @@
         }
 
         $(window).scroll(function () {
+            if(end){
+                return;
+            }
             // End of the document reached?
             if ($(window).scrollTop() >= $(document).height() - $(window).height() - 10){
                 $("#data-container").append("Daten werden geladen...");
