@@ -20,8 +20,10 @@ supermaerkte = ["Aldi Werkstadt","Aldi Industriestrasse Diez","Lidl Industriestr
 
 
 class Supermarket:
-    def __init__(self,location,name):
-        self.location = location
+    def __init__(self,id,postcode,adress,name):
+        self.id = id
+        self.postcode = postcode
+        self.adress = adress
         self.name = name
         self.list_of_warnings = []
 
@@ -45,8 +47,12 @@ class Supermarket:
         n = datetime.datetime.now()
         print([str(x) for x in self.list_of_warnings])
         self.list_of_warnings = [w for w in self.list_of_warnings if (n-w.dtime).total_seconds() <= seconds]
-
-dict_of_supermarkets = dict([ ( ("65549",supermarket), Supermarket("65549",supermarket) ) for supermarket in supermaerkte])
+id = 1
+supermarkets = [Supermarket(1,65549,"Musterstr.",supermarket) for supermarket in supermaerkte]
+for supermarket in  supermarkets:
+    supermarket.id = id
+    id +=1
+supermarkets_by_id = dict([(supermarkt.id,supermarkt) for supermarkt in supermarkets])
         
 
 class Warn:
@@ -75,42 +81,47 @@ def index():
     return render_template("search.html", form=form)
 
 
-@app.route('/warn', methods=['POST'])
-def warn():
-    data = request.form
+@app.route('/warn/<id>', methods=['POST'])
+def warn(id):
     print(request)
+    print(id)
     hashed = hashlib.md5(("-".join([str(x) for x in request.headers])+request.remote_addr).encode("utf-8")).digest()
     print(hashed)
     dtime = datetime.datetime.now()
-    location = data["location"]
-    supermarket = data["supermarket"]
+    supermarket = supermarkets_by_id[1]
     w = Warn(hashed,dtime)
-    S = dict_of_supermarkets[(location,supermarket)]
-    S.delete_old_warnings()
-    accepted = S.accept_warning(w)
-    dict_of_supermarkets[(location,supermarket)] = S
+    supermarket.delete_old_warnings()
+    accepted = supermarket.accept_warning(w)
     return Response(json.dumps(accepted),mimetype="application/json")
 
 
-@app.route('/receivedata', methods=['POST'])
-def receive_data():
-    plz = request.form['plz']
-    ll = []
-    for key in dict_of_supermarkets.keys():
-        location, Sname = key
-        S = dict_of_supermarkets[key]
-        S.delete_old_warnings()
-        ll.append( (Sname, len(S.list_of_warnings)))         
-    #print(json.dumps(scounter))
-    return Response(json.dumps(ll),mimetype="application/json")
+#@app.route('/receivedata', methods=['POST'])
+#def receive_data():
+#    plz = request.form['plz']
+#    ll = []
+#    for key in dict_of_supermarkets.keys():
+#        location, Sname = key
+#        S = dict_of_supermarkets[key]
+#        S.delete_old_warnings()
+#        ll.append( (Sname, len(S.list_of_warnings)))         
+#    #print(json.dumps(scounter))
+#    return Response(json.dumps(ll),mimetype="application/json")
 
 @app.route('/static/<path:path>')
 def send_js(path):
     return send_from_directory('static', path)
 
+
+@app.route('/receivedata',methods=['GET'])
+def receive_data():
+    ll = []
+    for markt in supermarkets:
+        ll.append({ "id":markt.id , "name":markt.name, "adress":markt.adress,"count":markt.list_of_warnings.__len__()})
+    return Response(json.dumps(ll),mimetype="application/json")
+
 if __name__ == '__main__':
     logging.basicConfig(filename="log.txt",level=logging.INFO)
-    STAGE = "" #"DEV"
+    STAGE = "DEV"
     if STAGE == "DEV":
         app.run(host='0.0.0.0',port=5000)
     else:
