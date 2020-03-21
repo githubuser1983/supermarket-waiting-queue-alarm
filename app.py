@@ -53,6 +53,7 @@ for supermarket in  supermarkets:
     supermarket.id = id
     id +=1
 supermarkets_by_id = dict([(supermarkt.id,supermarkt) for supermarkt in supermarkets])
+supermarkets_by_postcode = dict([(supermarkt.postcode,supermarkt) for supermarkt in supermarkets])
         
 
 class Warn:
@@ -114,10 +115,27 @@ def send_js(path):
 
 @app.route('/receivedata',methods=['GET'])
 def receive_data():
+    page = int(request.args.get('page'))
+    size = int(request.args.get('size'))
+    search = request.args.get('search')
+    postcode = int(request.args.get('postcode'))
+    fromPos = page * size
+    toPos = ((page + 1)*size)
+    print(fromPos)
+    print(toPos)
+   
+
     ll = []
     for markt in supermarkets:
-        ll.append({ "id":markt.id , "name":markt.name, "adress":markt.adress,"count":markt.list_of_warnings.__len__()})
-    return Response(json.dumps(ll),mimetype="application/json")
+        if (postcode == markt.postcode): 
+            ll.append({ "id":markt.id , "name":markt.name, "adress":markt.adress,"count":markt.list_of_warnings.__len__()})
+
+    if (len(ll) < fromPos or len(ll) == 0):
+        return Response(json.dumps([]),mimetype="application/json")
+    if (len(ll) < toPos):
+        toPos = len(ll)
+
+    return Response(json.dumps(ll[fromPos:toPos]),mimetype="application/json")
 
 if __name__ == '__main__':
     logging.basicConfig(filename="log.txt",level=logging.INFO)
