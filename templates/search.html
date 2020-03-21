@@ -1,162 +1,249 @@
 <html>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Warteschlangen-Alarm vor Supermarkt durch Corona</title>
+
 <head>
-    <meta charset="utf-8">
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
-    <link rel="stylesheet" href="//cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
-    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.js"></script>
-    <script type="text/javascript" src="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-    
-<style type="text/css">
- 
-/** Social Button CSS **/
+    <link rel="stylesheet" href="https://bootswatch.com/4/slate/bootstrap.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
+    <link rel="stylesheet" href="static/css/font-awesome.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-.share-btn {
-  display: inline-block;
-  color: #ffffff;
-  border: none;
-  padding: 0.1em 0.6em;
-  outline: none;
-  text-align: center;
-  font-size: 0.9em;
-  margin: 0 0.2em;
-}
+    <style>
+        /* Bootstrap 4 text input with search icon */
 
-.share-btn:focus,
-.share-btn:hover {
-  text-decoration: none;
-  opacity: 0.8;
-}
+        .has-search .form-control {
+            padding-left: 2.375rem;
+        }
 
-.share-btn:active {
-  color: #e2e2e2;
-}
+        .has-search .form-control-feedback {
+            position: absolute;
+            z-index: 2;
+            display: block;
+            width: 2.375rem;
+            height: 2.375rem;
+            line-height: 2.375rem;
+            text-align: center;
+            pointer-events: none;
+            color: #aaa;
+        }
 
-.share-btn.whatsapp { background: #00ff00; }
-.share-btn.twitter { background: #55acee; }
-.share-btn.google-plus { background: #dd4b39; }
-.share-btn.facebook { background: #3B5998; }
-.share-btn.stumbleupon { background: #EB4823; }
-.share-btn.reddit { background: #ff5700; }
-.share-btn.hackernews { background: #ff6600; }
-.share-btn.linkedin    { background: #4875B4; }
-.share-btn.email { background: #444444; }
- 
-</style>
+        .data-container{
+            background-color: #272B30;
+            padding: 0px;
+        }
+        .data-element{
+            margin-top: 0.2em;
+        }
+    </style>
+
 </head>
 
-<b>{{ form.autocomp.label }}:</b> 
-<p/>
-{{ form.autocomp }}
+<body>
+    <div class="container">
+        <form id="filterform" method="post" class="form-horizontal" action="">
+            <div class="mx-auto" style="max-width: 36rem; margin-top: 20px;">
+                <div class="form-group">
+                    <label for="plz">PLZ:</label>
+                    <input type="text" class="form-control" id="plz" name="plz" placeholder="Example: 97990"
+                        pattern="[0-9]{5}">
+                </div>
+            </div>
 
-<p/>
-<b id="choose"></b>
+            <div id="results" class="card mx-auto" style="max-width: 36rem; display: none;">
+                <div class="card-header">
+                    <div class="form-group has-search">
+                        <span class="fa fa-search form-control-feedback"></span>
+                        <input type="text" class="form-control" placeholder="Search" id="search" name="search" disabled>
+                    </div>
+                </div>
+                <div id="data-container" class="card-body data-container">
+                    Featured
+                </div>
+            </div>
 
-    <table id="prods" class="display" style="width:100%"> 
-    <thead> 
-        <tr>
-             <td>Warteschlange melden</td>
-             <td>Supermarkt</td>
-             <td>Anzahl Meldungen in der letzten Stunde</td>
-        </tr>
-    </thead>
-    <tbody></tbody>
-    </table>
+        </form>
+    </div>
 
-<script>
-    var plz;
-    var supermarkt = [];
-    var warnings = []
 
-    $(document).ready(function() {
-    $('#prods').DataTable({"language": {"url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/German.json"}});
-    } );
+    <script>
+        var page = -1;
+        var end = false;
+        var elementCount = 0;
 
-    function sendWarning(id,plz){
-      data = { "supermarket": supermarkt[id], "location" : plz };
-      $.ajax({ url: "/warn",type : "POST", data:data});
-      warnings[id] +=1;
-      var t = $('#prods').DataTable();
-      var idx = t.row(id).index();
-      t.cell(idx,2).data(t.cell(idx,2).data()+1).draw();
-    }
 
-    $(function() {
-        $.ajax({
-            url: '{{ url_for("autocomplete") }}'
-            }).done(function (data){
-                $('#city_autocomplete').autocomplete({
-                    source: data,
-                    minLength: 3,
-                    autoFocus:true,
-                    select: function(event,ui) {
-                       
-                     $("#choose").text("");
-                     var plz = ui.item.value;
-                     /**$("#prods").html(""); /** delete previous products**/
-                     supermarkt = [];
-                     warnings = [];
-                     var t = $('#prods').DataTable();
-                     t.clear(); /** remove all rows from table**/
+        $(plz).on('input', function () {
+            onPlzChange();
+        });
 
-                     $.post("/receivedata", 
-                                    {"plz": plz},
-                          function( prods ) {
-                             $.each(prods, function(index,value){ 
-                                t.row.add( 
-                                    [ '<button type="button" onclick="sendWarning('+index+','+plz+');">+1</button>',
-                                      value[0],
-                                      value[1]
-                                    ]
-                                ).draw();     
-                                /**$("#prods").append($("<tr><td><button type = 'button' id = '" + index + "' onclick='addToList("+index+");'>+</button> </td> <td>" + value[0]+"</td><td>" + value[1]+"</td><td>"+value[2]+"</td><td> "+value[3]+"</td></tr>"));      **/
-                                supermarkt.push(value[0]);
-                                warnings.push(value[1]);
-                             });
-                          }
-                          
-                     );
-      
+        $.validator.setDefaults({
+            submitHandler: function () {
+                alert("submitted!");
+            }
+        });
 
- 
-				var originalEvent = event,
-					input__event_type = '',
-					input__selection_type = '';
+        $(document).ready(function () {
+            $("#filterform").validate({
+                rules: {
+                    plz: {
+                        required: true,
+                        number: true,
+                        maxlength: 5,
+                        minlength: 5
+                    }
+                },
+                messages: {
+                    plz: {
+                        required: "Bitte geben Sie eine gültige Postleitzahl ein",
+                        minlength: "Eine Postleizahl muss aus 5 Zahlen bestehen",
+                        maxlength: "Eine Postleizahl muss aus 5 Zahlen bestehen",
+                        number: "Bitte geben Sie eine gültige Postleitzahl ein"
+                    }
+                },
+                errorElement: "em",
+                errorPlacement: function (error, element) {
+                    // Add the `help-block` class to the error element
+                    error.addClass("help-block");
 
-				while ( originalEvent ) {
-                                      if ( originalEvent.keyCode === 13 ) {
-						originalEvent.stopPropagation();
-					}
-					if ( originalEvent === event.originalEvent ) {
-						break;
-					}
-					originalEvent = event.originalEvent;
-				}
+                    // Add `has-feedback` class to the parent div.form-group
+                    // in order to add icons to inputs
+                    element.parents(".col-sm-5").addClass("has-feedback");
 
-				input__event_type = originalEvent.type;
-				
-				if ( input__event_type === 'menuselect' ) { // selected by keyboard instead of mouse/touch
-					input__selection_type = 'menuselect'
-				}
-                            /*DEBUG AUTOCOMPLETE*/console.log( 'DEBUG - AUTOCOMPLETE - SELECT EVENT IS', input__event_type );
-                   }
-                });
+                    if (element.prop("type") === "checkbox") {
+                        error.insertAfter(element.parent("label"));
+                    } else {
+                        error.insertAfter(element);
+                    }
+
+                    // Add the span element, if doesn't exists, and apply the icon classes to it.
+                    if (!element.next("span")[0]) {
+                        $("<span class='glyphicon glyphicon-remove form-control-feedback'></span>").insertAfter(element);
+                    }
+                },
+                success: function (label, element) {
+                    // Add the span element, if doesn't exists, and apply the icon classes to it.
+                    if (!$(element).next("span")[0]) {
+                        $("<span class='glyphicon glyphicon-ok form-control-feedback'></span>").insertAfter($(element));
+                    }
+                },
+                highlight: function (element, errorClass, validClass) {
+                    $(element).parents(".col-sm-5").addClass("has-error").removeClass("has-success");
+                    $(element).next("span").addClass("glyphicon-remove").removeClass("glyphicon-ok");
+                },
+                unhighlight: function (element, errorClass, validClass) {
+                    $(element).parents(".col-sm-5").addClass("has-success").removeClass("has-error");
+                    $(element).next("span").addClass("glyphicon-ok").removeClass("glyphicon-remove");
+                }
             });
         });
-</script>
-<div id="share-buttons">
-    
-    <a href="whatsapp://send?text=Warteschlangen-Alarm vor Supermarkt durch Corona http://www.orges-leka.de/limburg.html" class="share-btn whatsapp">Whatsapp</a>
-<!--    <a href="..." class="share-btn twitter">Twitter</a>
-<a href="..." class="share-btn facebook">Facebook</a>
-<a href="..." class="share-btn reddit">Reddit</a>
-<a href="..." class="share-btn hackernews">Hacker News</a>
-<a href="..." class="share-btn linkedin">LinkedIn</a>
-<a href="..." class="share-btn email">Email</a>--!>
 
-    
 
-</div>
+        function onPlzChange() {
+            elementCount = 0
+            end = false;
+            if ($("#filterform").valid()) {
+                loadDataInit();
+                $("#results").show();
+                loadData()
+            } else {
+                $("#results").hide();
+            }
+        }
+
+        function loadDataInit() {
+            page = 0;
+            $("#data-container").html("Daten werden geladen...");
+
+        }
+
+        function loadData() {
+            page = 0;
+            addDataToDataContainer(mockData(), false)
+
+        }
+
+
+        function addDataToDataContainer(data, append) {
+            if(data.length == 0){
+                end = true;
+                $("#data-container").append(`${elementCount}/${elementCount} Einträgen`);
+            }
+            var html = ""
+            for (index = 0; index < data.length; index++) {
+                html += `<div class="card data-element"><div class=\"card-body\">`
+                html += `<p>${data[index].name}<br/>`
+                html += `${data[index].adress}<br/>`
+                html += `Anzahl Warnung 1h:${data[index].waiting_queue_last_hour}<br/>`
+                html += `Anzahl Warnung 24h:${data[index].waiting_queue_last_24_hour}<br/></p>`
+                html += `<button type="button" class="btn btn-warning">Warteschlange melden</button>`
+                html += `</div></div>`
+            }
+            if (append) {
+                $("#data-container").html($("#data-container").html().replace("Daten werden geladen...",""));
+                $("#data-container").append(html);
+                elementCount = elementCount+data.length;
+
+            }
+            else {
+                $("#data-container").html(html);
+                elementCount = data.length;
+            }
+
+        }
+
+
+        function mockData() {
+            if(page == 5){
+                return [];
+            }
+
+            return [{
+                "id": 1,
+                "name": `Rewe1 ${page}`,
+                "adress": "Musterstr.6 90441 Nürnberg",
+                "waiting_queue_last_hour": 33,
+                "waiting_queue_last_24_hour": 33
+            }, {
+                "id": 2,
+                "name": "Rewe2",
+                "adress": "Musterstr.6 90441 Nürnberg",
+                "waiting_queue_last_hour": 33,
+                "waiting_queue_last_24_hour": 33
+            }, {
+                "id": 3,
+                "name": "Rewe3",
+                "adress": "Musterstr.6 90441 Nürnberg",
+                "waiting_queue_last_hour": 33,
+                "waiting_queue_last_24_hour": 33
+            }, {
+                "id": 4,
+                "name": "Rewe4",
+                "adress": "Musterstr.6 90441 Nürnberg",
+                "waiting_queue_last_hour": 33,
+                "waiting_queue_last_24_hour": 33
+            }, {
+                "id": 5,
+                "name": "Rewe5",
+                "adress": "Musterstr.6 90441 Nürnberg",
+                "waiting_queue_last_hour": 33,
+                "waiting_queue_last_24_hour": 33
+            }];
+        }
+
+        $(window).scroll(function () {
+            if(end){
+                return;
+            }
+            // End of the document reached?
+            if ($(window).scrollTop() >= $(document).height() - $(window).height() - 10){
+                $("#data-container").append("Daten werden geladen...");
+                page = page +1 ;
+                addDataToDataContainer(mockData(), true)
+            }
+        });
+
+
+
+    </script>
+</body>
+
+
 </html>
