@@ -26,11 +26,12 @@
             color: #aaa;
         }
 
-        .data-container{
+        .data-container {
             background-color: #272B30;
             padding: 0px;
         }
-        .data-element{
+
+        .data-element {
             margin-top: 0.2em;
         }
     </style>
@@ -135,6 +136,19 @@
             });
         });
 
+        function sendWarn(id){
+            $.ajax({
+                url: `warn/${id}`,
+                type: "post", //send it through get method
+                success: function (response) {
+                    onPlzChange()
+                },
+                error: function (xhr) {
+                    //Do Something to handle error
+                }
+            });
+        }
+
 
         function onPlzChange() {
             elementCount = 0
@@ -156,13 +170,14 @@
 
         function loadData() {
             page = 0;
-            addDataToDataContainer(mockData(), false)
-
+            data($("#plz"). val(),"",false)
         }
 
 
         function addDataToDataContainer(data, append) {
-            if(data.length == 0){
+            console.log(append)
+            console.log(data)
+            if (data.length == 0) {
                 end = true;
                 $("#data-container").append(`${elementCount}/${elementCount} Einträgen`);
             }
@@ -173,13 +188,13 @@
                 html += `${data[index].adress}<br/>`
                 html += `Anzahl Warnung 1h:${data[index].waiting_queue_last_hour}<br/>`
                 html += `Anzahl Warnung 24h:${data[index].waiting_queue_last_24_hour}<br/></p>`
-                html += `<button type="button" class="btn btn-warning">Warteschlange melden</button>`
+                html += `<button type="button" class="btn btn-warning" onClick="sendWarn(${data[index].id})">Warteschlange melden</button>`
                 html += `</div></div>`
             }
             if (append) {
-                $("#data-container").html($("#data-container").html().replace("Daten werden geladen...",""));
+                $("#data-container").html($("#data-container").html().replace("Daten werden geladen...", ""));
                 $("#data-container").append(html);
-                elementCount = elementCount+data.length;
+                elementCount = elementCount + data.length;
 
             }
             else {
@@ -190,8 +205,28 @@
         }
 
 
+        function data(postcode,search,append) {
+            console.log(append)
+            $.ajax({
+                url: "receivedata",
+                type: "get", //send it through get method
+                data: {
+                    "page": page,
+                    "size": 5,
+                    "postcode": postcode
+                },
+                success: function (response) {
+                    addDataToDataContainer(response,append)
+                },
+                error: function (xhr) {
+                    //Do Something to handle error
+                }
+            });
+        }
+
+
         function mockData() {
-            if(page == 5){
+            if (page == 5) {
                 return [];
             }
 
@@ -229,14 +264,14 @@
         }
 
         $(window).scroll(function () {
-            if(end){
+            if (end) {
                 return;
             }
             // End of the document reached?
-            if ($(window).scrollTop() >= $(document).height() - $(window).height() - 10){
+            if ($(window).scrollTop() >= $(document).height() - $(window).height() - 10) {
                 $("#data-container").append("Daten werden geladen...");
-                page = page +1 ;
-                addDataToDataContainer(mockData(), true)
+                page = page + 1;
+                data($("#plz").val(),"",true)
             }
         });
 

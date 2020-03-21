@@ -128,7 +128,7 @@ def receive_data():
     ll = []
     for markt in supermarkets:
         if (postcode == markt.postcode): 
-            ll.append({ "id":markt.id , "name":markt.name, "adress":markt.adress,"count":markt.list_of_warnings.__len__()})
+            ll.append({ "id":markt.id , "name":markt.name, "adress":markt.adress,"waiting_queue_last_hour":markt.list_of_warnings.__len__(),"waiting_queue_last_24_hour":markt.list_of_warnings.__len__()})
 
     if (len(ll) < fromPos or len(ll) == 0):
         return Response(json.dumps([]),mimetype="application/json")
