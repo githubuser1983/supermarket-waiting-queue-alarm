@@ -25,7 +25,7 @@ for (i in 1:nrow(subset_plz)){
   dat3[! is.na(dat3$addr.street),]
   dat3[! is.na(dat3$addr.housenumber),]
   dat_filt = cbind(dat2$addr.postcode,dat2$name,dat2$addr.street,dat2$addr.housenumber, dat2$geometry,dat2$osm_id)
-  write.csv2(dat_filt,append=T,col.names=F,row.names=F,file="test2.csv")
+  write.csv2(dat_filt,append=T,col.names=F,row.names=F,file="test2.csv",na="NA")
   dat_filt = cbind(dat3$addr.postcode,dat3$name,dat3$addr.street,dat3$addr.housenumber, dat3$geometry,dat3$osm_id)
-  write.csv2(dat_filt,append=T,col.names=F,row.names=F,file="test2.csv")
+  write.csv2(dat_filt,append=T,col.names=F,row.names=F,file="test2.csv",na="NA")
 }
