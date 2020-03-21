@@ -69,6 +69,7 @@
         var page = -1;
         var end = false;
         var elementCount = 0;
+        var load = false;
 
 
         $(plz).on('input', function () {
@@ -217,6 +218,7 @@
                 },
                 success: function (response) {
                     addDataToDataContainer(response,append)
+                    load = false;
                 },
                 error: function (xhr) {
                     //Do Something to handle error
@@ -264,11 +266,12 @@
         }
 
         $(window).scroll(function () {
-            if (end) {
+            if (end || load) {
                 return;
             }
             // End of the document reached?
-            if ($(window).scrollTop() >= $(document).height() - $(window).height() - 10) {
+            if ($(window).scrollTop() >= $(document).height() - $(window).height() - 300) {
+                load = true;
                 $("#data-container").append("Daten werden geladen...");
                 page = page + 1;
                 data($("#plz").val(),"",true)

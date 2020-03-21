@@ -89,7 +89,7 @@ def warn(id):
     hashed = hashlib.md5(("-".join([str(x) for x in request.headers])+request.remote_addr).encode("utf-8")).digest()
     print(hashed)
     dtime = datetime.datetime.now()
-    supermarket = supermarkets_by_id[1]
+    supermarket = supermarkets_by_id[int(id)]
     w = Warn(hashed,dtime)
     supermarket.delete_old_warnings()
     accepted = supermarket.accept_warning(w)
