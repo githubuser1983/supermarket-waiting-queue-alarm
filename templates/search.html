@@ -41,17 +41,11 @@
     <div class="container">
         <form id="filterform" method="post" class="form-horizontal" action="">
             <div class="mx-auto" style="max-width: 36rem; margin-top: 20px;">
-                <!-- <div class="card mx-auto" style="max-width: 36rem; margin-top: 20px;">
-                <div class="card-body">
-                -->
                 <div class="form-group">
                     <label for="plz">PLZ:</label>
                     <input type="text" class="form-control" id="plz" name="plz" placeholder="Example: 97990"
                         pattern="[0-9]{5}">
                 </div>
-
-                <!--                </div>
-            </div>-->
             </div>
 
             <div id="results" class="card mx-auto" style="max-width: 36rem; display: none;">
@@ -60,10 +54,7 @@
                         <span class="fa fa-search form-control-feedback"></span>
                         <input type="text" class="form-control" placeholder="Search" id="search" name="search" disabled>
                     </div>
-
-
                 </div>
-
                 <div id="data-container" class="card-body data-container">
                     Featured
                 </div>
@@ -101,8 +92,10 @@
                 },
                 messages: {
                     plz: {
-                        required: "Please enter a PLZ",
-                        minlength: "Your PLZ must consist of at least 5 Numbers"
+                        required: "Bitte geben Sie eine gültige Postleitzahl ein",
+                        minlength: "Eine Postleizahl muss aus 5 Zahlen bestehen",
+                        maxlength: "Eine Postleizahl muss aus 5 Zahlen bestehen",
+                        number: "Bitte geben Sie eine gültige Postleitzahl ein"
                     }
                 },
                 errorElement: "em",
