@@ -110,7 +110,7 @@ def send_js(path):
 
 if __name__ == '__main__':
     logging.basicConfig(filename="log.txt",level=logging.INFO)
-    STAGE = "DEV"
+    STAGE = "" #"DEV"
     if STAGE == "DEV":
         app.run(host='0.0.0.0',port=5000)
     else:
