@@ -181,8 +181,16 @@
 
         function addDataToDataContainer(data, append) {
             if (data.length == 0) {
-                end = true;
-                $("#data-container").append(`${elementCount}/${elementCount} Einträgen`);
+                if (append){
+                    end = true;
+                    $("#data-container").html($("#data-container").html().replace("Daten werden geladen...", ""));
+                    $("#data-container").append(`${elementCount}/${elementCount} Einträgen`);
+                }else{
+                    var html = `<div class="card data-element"><div class=\"card-body\">`
+                    html += `<p>Leider keine Einträge gefunden</p></div></div>`
+                    $("#data-container").html(html);
+                }
+                return;
             }
             var html = ""
             for (index = 0; index < data.length; index++) {
@@ -228,57 +236,18 @@
             });
         }
 
-
-        function mockData() {
-            if (page == 5) {
-                return [];
-            }
-
-            return [{
-                "id": 1,
-                "name": `Rewe1 ${page}`,
-                "adress": "Musterstr.6 90441 Nürnberg",
-                "waiting_queue_last_hour": 33,
-                "waiting_queue_last_24_hour": 33
-            }, {
-                "id": 2,
-                "name": "Rewe2",
-                "adress": "Musterstr.6 90441 Nürnberg",
-                "waiting_queue_last_hour": 33,
-                "waiting_queue_last_24_hour": 33
-            }, {
-                "id": 3,
-                "name": "Rewe3",
-                "adress": "Musterstr.6 90441 Nürnberg",
-                "waiting_queue_last_hour": 33,
-                "waiting_queue_last_24_hour": 33
-            }, {
-                "id": 4,
-                "name": "Rewe4",
-                "adress": "Musterstr.6 90441 Nürnberg",
-                "waiting_queue_last_hour": 33,
-                "waiting_queue_last_24_hour": 33
-            }, {
-                "id": 5,
-                "name": "Rewe5",
-                "adress": "Musterstr.6 90441 Nürnberg",
-                "waiting_queue_last_hour": 33,
-                "waiting_queue_last_24_hour": 33
-            }];
-        }
-
-        $(window).scroll(function () {
+        $(window).scroll($.debounce( 100, function () {
             if (end || load) {
                 return;
             }
             // End of the document reached?
-            if ($(window).scrollTop() >= $(document).height() - $(window).height() - 300) {
+            if ($(window).scrollTop() >= $(document).height() - $(window).height() - 10) {
                 load = true;
                 $("#data-container").append("Daten werden geladen...");
                 page = page + 1;
                 data($("#plz").val(),$("#search").val(),true)
             }
-        });
+        }));
 
 
 
