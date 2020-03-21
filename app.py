@@ -1,4 +1,4 @@
-from flask import Flask, Response, render_template, request
+from flask import Flask, Response, render_template, request,send_from_directory
 import json,csv,logging, hashlib,datetime
 from wtforms import TextField, Form
 from logging.handlers import RotatingFileHandler
@@ -103,6 +103,10 @@ def receive_data():
         ll.append( (Sname, len(S.list_of_warnings)))         
     #print(json.dumps(scounter))
     return Response(json.dumps(ll),mimetype="application/json")
+
+@app.route('/static/<path:path>')
+def send_js(path):
+    return send_from_directory('static', path)
 
 if __name__ == '__main__':
     logging.basicConfig(filename="log.txt",level=logging.INFO)
