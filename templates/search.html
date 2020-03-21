@@ -32,28 +32,47 @@
 <body>
     <div class="container">
         <form id="filterform" method="post" class="form-horizontal" action="">
-            <div class="card mx-auto" style="max-width: 36rem; margin-top: 20px;">
+            <div class="mx-auto" style="max-width: 36rem; margin-top: 20px;">
+                <!-- <div class="card mx-auto" style="max-width: 36rem; margin-top: 20px;">
                 <div class="card-body">
+                -->
+                <div class="form-group">
+                    <label for="plz">PLZ:</label>
+                    <input type="text" class="form-control" id="plz" name="plz" placeholder="Example: 97990"
+                        pattern="[0-9]{5}">
+                </div>
 
-                    <div class="form-group">
-                        <label for="plz">PLZ:</label>
-                        <input type="text" class="form-control" id="plz" name="plz" placeholder="Example: 97990"
-                            pattern="[0-9]{5}">
-                    </div>
+                <!--                </div>
+            </div>-->
+            </div>
 
+            <div id="results" class="card mx-auto" style="max-width: 36rem; display: none;">
+                <div class="card-header">
                     <div class="form-group has-search">
                         <span class="fa fa-search form-control-feedback"></span>
-                        <input type="text" class="form-control" placeholder="Search"id="search" name="search">
-                      </div>
+                        <input type="text" class="form-control" placeholder="Search" id="search" name="search" disabled>
+                    </div>
 
 
                 </div>
+
+                <div id="data-container" class="card-body">
+                    Featured
+                </div>
             </div>
+
         </form>
     </div>
 
 
     <script>
+        var page = -1;
+
+
+        $(plz).on('input', function () {
+            onPlzChange();
+        });
+
         $.validator.setDefaults({
             submitHandler: function () {
                 alert("submitted!");
@@ -112,6 +131,79 @@
                 }
             });
         });
+
+
+        function onPlzChange() {
+            if ($("#filterform").valid()) {
+                loadDataInit();
+                $("#results").show();
+                loadData()
+            } else {
+                $("#results").hide();
+            }
+        }
+
+        function loadDataInit() {
+            page = 0;
+            $("#data-container").html("Daten werden geladen...");
+
+        }
+
+        function loadData() {
+            page = 0;
+            addDataToDataContainer(mockData(),false)
+
+        }
+
+
+        function addDataToDataContainer(data, append) {
+            var html = ""
+            for (index = 0; index < data.length; index++) {
+                html += `<div class="card"><div class=\"card-body\">`
+                html += `<p>${data[index].name}</p>`
+                html += `<p>${data[index].adress}</p>`
+                html += `<p>Anzahl Warnung 1h:${data[index].waiting_queue_last_hour}</p>`
+                html += `<p>Anzahl Warnung 24h:${data[index].waiting_queue_last_24_hour}</p>`
+                html += `</div></div>`
+            }
+            if (append) {
+
+            }
+            else {
+                $("#data-container").html(html);
+            }
+
+        }
+
+
+        function mockData() {
+            return [{
+                "name": "Rewe1",
+                "adress": "Musterstr.6 90441 Nürnberg",
+                "waiting_queue_last_hour": 33,
+                "waiting_queue_last_24_hour": 33
+            }, {
+                "name": "Rewe2",
+                "adress": "Musterstr.6 90441 Nürnberg",
+                "waiting_queue_last_hour": 33,
+                "waiting_queue_last_24_hour": 33
+            }, {
+                "name": "Rewe3",
+                "adress": "Musterstr.6 90441 Nürnberg",
+                "waiting_queue_last_hour": 33,
+                "waiting_queue_last_24_hour": 33
+            }, {
+                "name": "Rewe4",
+                "adress": "Musterstr.6 90441 Nürnberg",
+                "waiting_queue_last_hour": 33,
+                "waiting_queue_last_24_hour": 33
+            }, {
+                "name": "Rewe5",
+                "adress": "Musterstr.6 90441 Nürnberg",
+                "waiting_queue_last_hour": 33,
+                "waiting_queue_last_24_hour": 33
+            }];
+        }
 
 
 
