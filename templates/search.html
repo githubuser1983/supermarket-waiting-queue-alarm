@@ -25,6 +25,11 @@
             pointer-events: none;
             color: #aaa;
         }
+
+        .data-container{
+            background-color: #272B30;
+            padding: 0px;
+        }
     </style>
 
 </head>
@@ -56,7 +61,7 @@
 
                 </div>
 
-                <div id="data-container" class="card-body">
+                <div id="data-container" class="card-body data-container">
                     Featured
                 </div>
             </div>
@@ -151,7 +156,7 @@
 
         function loadData() {
             page = 0;
-            addDataToDataContainer(mockData(),false)
+            addDataToDataContainer(mockData(), false)
 
         }
 
@@ -160,13 +165,16 @@
             var html = ""
             for (index = 0; index < data.length; index++) {
                 html += `<div class="card"><div class=\"card-body\">`
-                html += `<p>${data[index].name}</p>`
-                html += `<p>${data[index].adress}</p>`
-                html += `<p>Anzahl Warnung 1h:${data[index].waiting_queue_last_hour}</p>`
-                html += `<p>Anzahl Warnung 24h:${data[index].waiting_queue_last_24_hour}</p>`
+                html += `<p>${data[index].name}<br/>`
+                html += `${data[index].adress}<br/>`
+                html += `Anzahl Warnung 1h:${data[index].waiting_queue_last_hour}<br/>`
+                html += `Anzahl Warnung 24h:${data[index].waiting_queue_last_24_hour}<br/></p>`
+                html += `<button type="button" class="btn btn-warning">Warteschlange melden</button>`
                 html += `</div></div>`
             }
             if (append) {
+                $("#data-container").html($("#data-container").html().replace("Daten werden geladen...",""));
+                $("#data-container").append(html);
 
             }
             else {
@@ -178,32 +186,46 @@
 
         function mockData() {
             return [{
-                "name": "Rewe1",
+                "id": 1,
+                "name": `Rewe1 ${page}`,
                 "adress": "Musterstr.6 90441 Nürnberg",
                 "waiting_queue_last_hour": 33,
                 "waiting_queue_last_24_hour": 33
             }, {
+                "id": 2,
                 "name": "Rewe2",
                 "adress": "Musterstr.6 90441 Nürnberg",
                 "waiting_queue_last_hour": 33,
                 "waiting_queue_last_24_hour": 33
             }, {
+                "id": 3,
                 "name": "Rewe3",
                 "adress": "Musterstr.6 90441 Nürnberg",
                 "waiting_queue_last_hour": 33,
                 "waiting_queue_last_24_hour": 33
             }, {
+                "id": 4,
                 "name": "Rewe4",
                 "adress": "Musterstr.6 90441 Nürnberg",
                 "waiting_queue_last_hour": 33,
                 "waiting_queue_last_24_hour": 33
             }, {
+                "id": 5,
                 "name": "Rewe5",
                 "adress": "Musterstr.6 90441 Nürnberg",
                 "waiting_queue_last_hour": 33,
                 "waiting_queue_last_24_hour": 33
             }];
         }
+
+        $(window).scroll(function () {
+            // End of the document reached?
+            if ($(window).scrollTop() >= $(document).height() - $(window).height() - 10){
+                $("#data-container").append("Daten werden geladen...");
+                page = page +1 ;
+                addDataToDataContainer(mockData(), true)
+            }
+        });
 
 
 
