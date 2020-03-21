@@ -2,6 +2,7 @@ from flask import Flask, Response, render_template, request,send_from_directory
 import json,csv,logging, hashlib,datetime
 from wtforms import TextField, Form
 from logging.handlers import RotatingFileHandler
+from apscheduler.schedulers.background import BackgroundScheduler
 
 app = Flask(__name__)
 
@@ -68,6 +69,14 @@ class SearchForm(Form):
     autocomp = TextField('Bitte Postleitzahl angeben (65549)', id='city_autocomplete')
 
 
+
+def job_function():
+    print("run clean funktion")
+    for markt in supermarkets:
+        markt.delete_old_warnings()
+
+
+
 @app.route('/_autocomplete', methods=['GET'])
 def autocomplete():
     return Response(json.dumps(cities), mimetype='application/json')
@@ -94,19 +103,6 @@ def warn(id):
     supermarket.delete_old_warnings()
     accepted = supermarket.accept_warning(w)
     return Response(json.dumps(accepted),mimetype="application/json")
-
-
-#@app.route('/receivedata', methods=['POST'])
-#def receive_data():
-#    plz = request.form['plz']
-#    ll = []
-#    for key in dict_of_supermarkets.keys():
-#        location, Sname = key
-#        S = dict_of_supermarkets[key]
-#        S.delete_old_warnings()
-#        ll.append( (Sname, len(S.list_of_warnings)))         
-#    #print(json.dumps(scounter))
-#    return Response(json.dumps(ll),mimetype="application/json")
 
 @app.route('/static/<path:path>')
 def send_js(path):
@@ -135,7 +131,7 @@ def receive_data():
                     found = False
 
         if (postcode == markt.postcode and found): 
-            ll.append({ "id":markt.id , "name":markt.name, "adress":markt.adress,"waiting_queue_last_hour":markt.list_of_warnings.__len__(),"waiting_queue_last_24_hour":markt.list_of_warnings.__len__()})
+            ll.append({ "id":markt.id , "name":markt.name, "adress":markt.adress,"waiting_queue_last_hour":markt.list_of_warnings.__len__()})
 
     if (len(ll) < fromPos or len(ll) == 0):
         return Response(json.dumps([]),mimetype="application/json")
@@ -145,6 +141,9 @@ def receive_data():
     return Response(json.dumps(ll[fromPos:toPos]),mimetype="application/json")
 
 if __name__ == '__main__':
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(job_function, 'interval', seconds=5*60)
+    scheduler.start()
     logging.basicConfig(filename="log.txt",level=logging.INFO)
     STAGE = "DEV"
     if STAGE == "DEV":

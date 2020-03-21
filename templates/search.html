@@ -197,8 +197,8 @@
                 html += `<div class="card data-element"><div class=\"card-body\">`
                 html += `<p>${data[index].name}<br/>`
                 html += `${data[index].adress}<br/>`
-                html += `Anzahl Warnung 1h:${data[index].waiting_queue_last_hour}<br/>`
-                html += `Anzahl Warnung 24h:${data[index].waiting_queue_last_24_hour}<br/></p>`
+                html += `Anzahl Warnung 1h:${data[index].waiting_queue_last_hour}<br/></p>`
+                //html += `Anzahl Warnung 24h:${data[index].waiting_queue_last_24_hour}<br/></p>` // aktuell im Backend nicht vorhanden
                 html += `<button type="button" class="btn btn-warning" onClick="sendWarn(${data[index].id})">Warteschlange melden</button>`
                 html += `</div></div>`
             }
