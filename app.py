@@ -2,7 +2,7 @@ from flask import Flask, Response, render_template, request,send_from_directory
 import json,csv,logging, hashlib,datetime
 from wtforms import TextField, Form
 from logging.handlers import RotatingFileHandler
-from apscheduler.schedulers.background import BackgroundScheduler
+#from apscheduler.schedulers.background import BackgroundScheduler
 
 app = Flask(__name__)
 
@@ -141,9 +141,9 @@ def receive_data():
     return Response(json.dumps(ll[fromPos:toPos]),mimetype="application/json")
 
 if __name__ == '__main__':
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(job_function, 'interval', seconds=5*60)
-    scheduler.start()
+#    scheduler = BackgroundScheduler()
+#    scheduler.add_job(job_function, 'interval', seconds=5*60)
+#    scheduler.start()
     logging.basicConfig(filename="log.txt",level=logging.INFO)
     STAGE = "DEV"
     if STAGE == "DEV":
