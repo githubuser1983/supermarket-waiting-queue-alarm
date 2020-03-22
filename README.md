@@ -32,8 +32,12 @@ poetry install
 # build the docker-containers
 docker-compose build
 
-# makemigrations <- migrations are commited right now, skipping this step until
-# production, FIXME: Dominik 20.3.20
+# makemigrations
+docker-compose run django /app/manage.py makemigrations
+docker-compose run django /app/manage.py migrate
+
+# create a superuser
+docker-compose run django /app/manage.py createsuperuser
 
 # start the containers
 docker-compose up

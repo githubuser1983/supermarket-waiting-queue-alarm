@@ -85,11 +85,13 @@ THIRD_PARTY_APPS = [
     "rest_framework",
     "django_extensions",
     "django_celery_beat",
+    "allauth"
 ]
 
 LOCAL_APPS = [
     # custom apps
     "apps.users.apps.UsersConfig",
+    "apps.supermarkets.apps.SupermarketConfig",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

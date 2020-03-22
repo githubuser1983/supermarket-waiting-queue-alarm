@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block css %}
+{{ block.super }}
+{% endblock css %}
+
+{% block title %}{{ block.super }}{% endblock title %}
+
+{% block content %}
+<!-- Content -->
+<!-- client table -->  
+<div class="table">
+<table>
+  <thead>
+    <tr>
+      <th scope="col" style="width: 40px; ">#</th>
+      <th scope="col">ID</th>
+      <th scope="col">Name</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for city in cities %}
+    <tr>
+      <td>
+        {{ forloop.counter }}
+      </td>
+      <td>
+        {{ city.ID }}
+      </td>
+      <td>
+        {{ city.name }}
+      </td>
+      <td>
+        {{ city.postcode }}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+<!-- /client table -->
+
+<!-- Pagination -->
+<div class="pagination">
+  {% if is_paginated %}
+    {% include 'pagination.html' with page=page_obj base_url=request.path %}
+  {% endif %}
+</div>
+<!-- /Pagination -->
+
+<!-- /Content -->
+{% endblock content %}
+
+{% block javascript %}
+{{block.super}}
+
+{% endblock javascript %}
