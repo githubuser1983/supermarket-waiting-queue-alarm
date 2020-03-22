@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="logo">
+    <img src="static/pics/logo.png" alt="Logo" class="center">
+</div>
+
+<form id="filterform" method="post" class="form-horizontal" action="">
+    <div class="mx-auto" style="max-width: 36rem; margin-top: 20px;">
+        <div class="form-group">
+            <label for="plz">PLZ:</label>
+            <input type="text" class="form-control" id="plz" name="plz" placeholder="Example: 97990"
+                pattern="[0-9]{5}">
+        </div>
+    </div>
+
+    <div id="results" class="card mx-auto" style="max-width: 36rem; display: none;">
+        <div class="card-header">
+            <div class="form-group has-search">
+                <span class="fa fa-search form-control-feedback"></span>
+                <input type="text" class="form-control" placeholder="Search" id="search" name="search">
+            </div>
+        </div>
+        <div id="data-container" class="card-body data-container">
+            Featured
+        </div>
+    </div>
+
+</form>
+
+{% endblock content %}
+
+{% block javascript %}
+{{ block.super }}
+    <script>
+        var page = -1;
+        var end = false;
+        var elementCount = 0;
+        var load = false;
+
+
+        $(plz).on('input', function () {
+            onPlzChange();
+        });
+
+        $(search).keyup( $.debounce( 800, onPlzChange ) );
+
+
+        $.validator.setDefaults({
+            submitHandler: function () {
+                alert("submitted!");
+            }
+        });
+
+        $(document).ready(function () {
+            $("#filterform").validate({
+                rules: {
+                    plz: {
+                        required: true,
+                        number: true,
+                        maxlength: 5,
+                        minlength: 5
+                    }
+                },
+                messages: {
+                    plz: {
+                        required: "Bitte geben Sie eine gültige Postleitzahl ein",
+                        minlength: "Eine Postleizahl muss aus 5 Zahlen bestehen",
+                        maxlength: "Eine Postleizahl muss aus 5 Zahlen bestehen",
+                        number: "Bitte geben Sie eine gültige Postleitzahl ein"
+                    }
+                },
+                errorElement: "em",
+                errorPlacement: function (error, element) {
+                    // Add the `help-block` class to the error element
+                    error.addClass("help-block");
+
+                    // Add `has-feedback` class to the parent div.form-group
+                    // in order to add icons to inputs
+                    element.parents(".col-sm-5").addClass("has-feedback");
+
+                    if (element.prop("type") === "checkbox") {
+                        error.insertAfter(element.parent("label"));
+                    } else {
+                        error.insertAfter(element);
+                    }
+
+                    // Add the span element, if doesn't exists, and apply the icon classes to it.
+                    if (!element.next("span")[0]) {
+                        $("<span class='glyphicon glyphicon-remove form-control-feedback'></span>").insertAfter(element);
+                    }
+                },
+                success: function (label, element) {
+                    // Add the span element, if doesn't exists, and apply the icon classes to it.
+                    if (!$(element).next("span")[0]) {
+                        $("<span class='glyphicon glyphicon-ok form-control-feedback'></span>").insertAfter($(element));
+                    }
+                },
+                highlight: function (element, errorClass, validClass) {
+                    $(element).parents(".col-sm-5").addClass("has-error").removeClass("has-success");
+                    $(element).next("span").addClass("glyphicon-remove").removeClass("glyphicon-ok");
+                },
+                unhighlight: function (element, errorClass, validClass) {
+                    $(element).parents(".col-sm-5").addClass("has-success").removeClass("has-error");
+                    $(element).next("span").addClass("glyphicon-ok").removeClass("glyphicon-remove");
+                }
+            });
+        });
+
+        function sendWarn(id){
+            $.ajax({
+                url: `warn/${id}`,
+                type: "post", //send it through get method
+                success: function (response) {
+                    onPlzChange()
+                },
+                error: function (xhr) {
+                    //Do Something to handle error
+                }
+            });
+        }
+
+
+        function onPlzChange() {
+            elementCount = 0
+            end = false;
+            if ($("#filterform").valid()) {
+                loadDataInit();
+                $("#results").show();
+                loadData()
+            } else {
+                $("#results").hide();
+            }
+        }
+
+        function loadDataInit() {
+            page = 0;
+            $("#data-container").html("Daten werden geladen...");
+
+        }
+
+        function loadData() {
+            page = 0;
+            data($("#plz"). val(),$("#search").val(),false)
+        }
+
+
+        function addDataToDataContainer(data, append) {
+            if (data.length == 0) {
+                if (append){
+                    end = true;
+                    $("#data-container").html($("#data-container").html().replace("Daten werden geladen...", ""));
+                    $("#data-container").append(`${elementCount}/${elementCount} Einträgen`);
+                }else{
+                    var html = `<div class="card data-element"><div class=\"card-body\">`
+                    html += `<p>Leider keine Einträge gefunden</p></div></div>`
+                    $("#data-container").html(html);
+                }
+                return;
+            }
+            var html = ""
+            for (index = 0; index < data.length; index++) {
+                html += `<div class="card data-element"><div class=\"card-body\">`
+                html += `<p>${data[index].name}<br/>`
+                html += `${data[index].adress}<br/>`
+                html += `Anzahl Warnung 1h:${data[index].waiting_queue_last_hour}<br/></p>`
+                //html += `Anzahl Warnung 24h:${data[index].waiting_queue_last_24_hour}<br/></p>` // aktuell im Backend nicht vorhanden
+                html += `<button type="button" class="btn btn-warning" onClick="sendWarn(${data[index].id})">Warteschlange melden</button>`
+                html += `</div></div>`
+            }
+            if (append) {
+                $("#data-container").html($("#data-container").html().replace("Daten werden geladen...", ""));
+                $("#data-container").append(html);
+                elementCount = elementCount + data.length;
+
+            }
+            else {
+                $("#data-container").html(html);
+                elementCount = data.length;
+            }
+
+        }
+
+
+        function data(postcode,search,append) {
+            $.ajax({
+                url: "receivedata",
+                type: "get", //send it through get method
+                data: {
+                    "page": page,
+                    "size": 5,
+                    "postcode": postcode,
+                    "search": search
+                },
+                success: function (response) {
+                    addDataToDataContainer(response,append)
+                    load = false;
+                },
+                error: function (xhr) {
+                    //Do Something to handle error
+                }
+            });
+        }
+
+        $(window).scroll($.debounce( 100, function () {
+            if (end || load) {
+                return;
+            }
+            // End of the document reached?
+            if ($(window).scrollTop() >= $(document).height() - $(window).height() - 10) {
+                load = true;
+                $("#data-container").append("Daten werden geladen...");
+                page = page + 1;
+                data($("#plz").val(),$("#search").val(),true)
+            }
+        }));
+
+    </script>
+
+{% endblock javascript %}

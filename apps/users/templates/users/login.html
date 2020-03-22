@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Anmelden · {{ block.super }}{% endblock title %}
+
+
+{% block outer_content %}
+
+  <div class="card shadow">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-2"></div>
+        <div class="col-3">
+          <div class="login" style="min-height: 0;">
+            <!-- Login -->
+            <div class="login__block active" id="l-login">
+              <div class="login__block__header">
+                <i class="zmdi zmdi-account-circle"></i>
+                    Zugangsdaten zu myrechnung
+              </div>
+
+              <br>
+              <div class="login__block__body">
+                <form method="post">
+                  {% csrf_token %}
+                  {{ form.username|as_crispy_field }}
+                  {{ form.password|as_crispy_field }}
+                  {% for error in field.errors %}
+                  {{error}}
+                  {% endfor %}
+                  <input type="submit" value="Login">
+              </form>
+
+
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col"></div>
+      </div>
+    </div>
+  </div>
+
+{% endblock outer_content %}

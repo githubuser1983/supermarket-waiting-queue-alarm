@@ -1,0 +1,25 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.autoSave": "onFocusChange",
+		"files.eol": "\n",
+		"files.exclude": {
+			"**/__pycache__": true,
+			".vscode/": true,
+			".VSCodeCounter/": true,
+			".ipynb_checkpoints/": true,
+			".ipython/": true,
+			"notebooks/.ipynb_checkpoints/": true,
+		},
+		"editor.quickSuggestions": {
+			"other": true,
+			"comments": false,
+			"strings": false
+		},
+		"editor.quickSuggestionsDelay": 3,
+	}
+}

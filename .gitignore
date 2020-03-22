@@ -1,1 +1,18 @@
-**/log.txt
+# python-cache
+__pycache__/
+*.py[cod]
+.pytest_cache/*
+.python-version
+
+# jupyter-notebooks
+notebooks/.ipynb_checkpoints
+.ipython/*
+
+# test-coverage
+.coverage
+
+# celery
+celerybeat.pid
+
+# Logs
+logs/
