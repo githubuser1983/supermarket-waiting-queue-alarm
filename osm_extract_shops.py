@@ -1,14 +1,16 @@
 # WirVsVirsuHackathon 2020
+# Description of the project:
+# https://devpost.com/software/supermarket-alarm
+# 
 # Enhances CSV list into an address list of supermarkets sorted by postcode
 # 
 # (c) Manuel Neumann
 #
-from collections import OrderedDict
-from OSMPythonTools.data import Data, dictRangeYears, ALL
+from OSMPythonTools.data import Data, ALL
 from OSMPythonTools.overpass import overpassQueryBuilder, Overpass
 from OSMPythonTools.nominatim import Nominatim
 
-import csv
+import csv, sys
 
 def readCSVFile(filename):
     # Read csv file in the following format:
@@ -26,13 +28,20 @@ def readCSVFile(filename):
 
 overpass = Overpass()
 nominatim = Nominatim()
+fileName = sys.argv[1] # Get filename from command line
 
-plzList = readCSVFile('ww-german-postal-codes.csv')
-writer = csv.writer(open("postal-codes-supermarkets.csv", "w"), delimiter  =';')
+fileNameToSave = fileName[0:len(fileName) - 4] + '-supermarkets.csv'
+
+plzList = readCSVFile(fileName)
+writer = csv.writer(open(fileNameToSave, "w"), delimiter  =';')
     
 # loop over postcodes and get list of supermarkets
  
+plzIdx = 0 
 for plz in plzList:
+    plzIdx += 1
+    if plzIdx % 100 == 0:
+        print(plzIdx,'/',len(plzList))
     areaId = nominatim.query(plz).areaId()
     if areaId is None:
         continue
@@ -46,7 +55,7 @@ for plz in plzList:
             continue
         if item.tag('addr:street') == None:
             continue
-        row = item.tag('addr:postcode'), item.tag('addr:street'), item.tag('addr:housenumber'),item.tag('name')
+        row = item.tag('addr:postcode'), item.tag('name'), item.tag('addr:street'), item.tag('addr:housenumber')
         
         #add row to output
         writer.writerow(row)
