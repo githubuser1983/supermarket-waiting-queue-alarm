@@ -33,7 +33,9 @@ fileName = sys.argv[1] # Get filename from command line
 fileNameToSave = fileName[0:len(fileName) - 4] + '-supermarkets.csv'
 
 plzList = readCSVFile(fileName)
-writer = csv.writer(open(fileNameToSave, "w"), delimiter  =';')
+plzList = sorted(plzList)
+fieldnames = ['postcode', 'name', 'street']
+writer = csv.DictWriter(open(fileNameToSave, "w"), fieldnames=fieldnames, delimiter  =';')
     
 # loop over postcodes and get list of supermarkets
  
@@ -53,12 +55,10 @@ for plz in plzList:
     for item in result.elements():
         if item is None:
             continue
-        if item.tag('addr:street') == None:
+        if item.tag('addr:street') == None or item.tag('addr:postcode') == None or item.tag('name') == None:
             continue
-        row = item.tag('addr:postcode'), item.tag('name'), item.tag('addr:street'),' ', item.tag('addr:housenumber')
-        
         #add row to output
-        writer.writerow(row)
+        writer.writerow({'postcode': str(item.tag('addr:postcode')), 'name': item.tag('name') ,'street': str(item.tag('addr:street'))+' '+str(item.tag('addr:housenumber'))})
     
 
 
