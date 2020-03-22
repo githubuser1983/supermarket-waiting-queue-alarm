@@ -16,3 +16,6 @@ celerybeat.pid
 
 # Logs
 logs/
+local/
+.vscode/settings.json
+log.txt

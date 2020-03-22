@@ -3,11 +3,19 @@ from django.views.generic import ListView, CreateView
 from django.views.generic.detail import DetailView
 from django.views.generic.base import TemplateView
 from django.http import JsonResponse
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.renderers import JSONRenderer
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from rest_framework import status
+
 
 import json
 from django.core.serializers.json import DjangoJSONEncoder
 
-from .models import Supermarket, Cities
+from .models import Supermarket, City, Warn
 
 
 class SupermarketList(ListView):
@@ -18,51 +26,82 @@ class SupermarketList(ListView):
 
 
 class CitiesList(ListView):
-    model = Cities
+    model = City
     template_name = "supermarkets/cities_list.html"
     context_object_name = "cities"
     paginate_by = 25
 
 
-class ReceiveSupermarketsFromQuery(ListView):
+class ReceiveSupermarketsFromQuery(APIView):
     model = Supermarket
-    template_name = "supermarkets/market_list.html"
-    paginate_by = 25
     context_object_name = "supermarkets"
+    renderer_classes = [JSONRenderer]
 
-    def get_queryset(self):
-        size = self.kwargs.get('size', None)
-        page = self.kwargs.get('page', None)
-        search = self.kwargs.get('search', None)
-        postcode = self.kwargs.get('postcode', None)
+    def get(self, request, format=None):
+        size = request.GET['size']
+        page = request.GET['page']
+        search = request.GET['search']
+        postcode = int(request.GET['postcode'])
+        fromPos = 0
+        toPos = 2000
+        print(size)
+        print(page)
 
+        if page != None and size != None:
+            fromPos = int(page) * int(size)
+            toPos = ((int(page) + 1)*int(size))
+
+        searchSplit = []
         if search is not None:
-            search_split = search.lower().split()
+            searchSplit = search.lower().split()
 
         markets = Supermarket.objects.all()
         
-        matches = []
-        
-        for market in markets:
-            market_info = "".join[market.address, market.name, market.city.postcode, market.city.name]
-            if any([s in market_info for s in search_split]):
-                matches.append(market.id)
+        ll = []
+        for markt in markets:
+            found = True
+            address = markt.address+" "+str(markt.city.postcode)+" "+markt.city.name
+            print(address)
+            print(postcode)
+            searchMarket = (markt.name+address).lower()
+            if len(searchSplit) > 0:
+             for searchSplitEntry in searchSplit:
+                    if not searchMarket.__contains__(searchSplitEntry):
+                     found = False
+            if (postcode == markt.city.postcode and found): 
+                ll.append({ "id":markt.id , "name":markt.name, "adress":address,"waiting_queue_last_hour": str(markt.waiting_queue_last_hour)})
 
-        queryset = super().get_queryset()
-        
-        
-        filtered = queryset.filter(pk__in=matches)
-        
-        # .values('address','id', 'name')
-        serialized_q = json.dumps(list(filtered), cls=DjangoJSONEncoder)
-        JsonResponse(serialized_q)
+        if (len(ll) < fromPos or len(ll) == 0):
+            return Response([])
+        if (len(ll) < toPos):
+            toPos = len(ll)
 
-        return filtered
+        return Response(ll[fromPos:toPos])
     
 
 
-class WarningCreateView(CreateView):
-    pass
+
+@method_decorator(csrf_exempt, name='dispatch')
+class WarningCreateView(APIView):
+    model = Supermarket
+    context_object_name = "supermarkets"
+    renderer_classes = [JSONRenderer]
+
+    def get_object(self, pk):
+        try:
+            return Supermarket.objects.get(pk=pk)
+        except Supermarket.DoesNotExist:
+            raise Http404
+
+
+    @csrf_exempt
+    def post(self, request, pk, format=None):
+        market = self.get_object(pk)
+        newWaring = Warn()
+        newWaring.supermarket = market
+        newWaring.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 #     model = Warn
 
 #     def post(self, request, *args, **kwargs):
