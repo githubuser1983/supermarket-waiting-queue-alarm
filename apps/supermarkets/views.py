@@ -44,8 +44,10 @@ class ReceiveSupermarketsFromQuery(APIView):
         postcode = int(request.GET['postcode'])
         fromPos = 0
         toPos = 2000
+        print(size)
+        print(page)
 
-        if page != None and size == None:
+        if page != None and size != None:
             fromPos = int(page) * int(size)
             toPos = ((int(page) + 1)*int(size))
 
@@ -74,7 +76,7 @@ class ReceiveSupermarketsFromQuery(APIView):
         if (len(ll) < toPos):
             toPos = len(ll)
 
-        return Response(ll)
+        return Response(ll[fromPos:toPos])
     
 
 
