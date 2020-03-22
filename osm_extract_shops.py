@@ -55,7 +55,7 @@ for plz in plzList:
             continue
         if item.tag('addr:street') == None:
             continue
-        row = item.tag('addr:postcode'), item.tag('name'), item.tag('addr:street'), item.tag('addr:housenumber')
+        row = item.tag('addr:postcode'), item.tag('name'), item.tag('addr:street'),' ', item.tag('addr:housenumber')
         
         #add row to output
         writer.writerow(row)
