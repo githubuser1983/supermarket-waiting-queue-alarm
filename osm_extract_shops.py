@@ -47,7 +47,7 @@ for plz in plzList:
     areaId = nominatim.query(plz).areaId()
     if areaId is None:
         continue
-    query = overpassQueryBuilder(area=areaId, elementType='node', selector='"shop"="supermarket"', includeGeometry=True, out='body')
+    query = overpassQueryBuilder(area=areaId, elementType='node', selector='"shop"="supermarket"', out='body') # includeGeometry=True,
     result = overpass.query(query, timeout=60)
     
     if result.countElements() <= 0:
