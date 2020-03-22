@@ -16,7 +16,7 @@ class Supermarket(models.Model):
     address = models.CharField(max_length=256)
     name = models.CharField(max_length=256)
     city = models.ForeignKey(
-        "supermarkets.Cities",
+        "supermarkets.City",
         related_name="supermarkets",
         on_delete=models.SET_NULL,
         null=True,
