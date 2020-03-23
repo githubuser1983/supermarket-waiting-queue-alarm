@@ -21,6 +21,7 @@ def importall():
             if is_number(row['plz']):
                 print(row['plz']+row['adresse'])
                 cur.execute( "Insert into supermarkets_supermarket (id,timestamp,address,name,city_id) values (%s,%s,%s,%s,(select id from supermarkets_city where postcode = %s limit 1))",(str(uuid.uuid4()),datetime.now(),row['adresse'],row['supermarkt'],int(row['plz'])))
+    conn.commit()
     cur.close()
     conn.close()
 
