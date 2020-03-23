@@ -55,7 +55,7 @@ class ReceiveSupermarketsFromQuery(APIView):
         if search is not None:
             searchSplit = search.lower().split()
 
-        markets = Supermarket.objects.all()
+        markets = Supermarket.objects.filter(city__postcode=postcode)
         
         ll = []
         for markt in markets:
@@ -68,7 +68,7 @@ class ReceiveSupermarketsFromQuery(APIView):
              for searchSplitEntry in searchSplit:
                     if not searchMarket.__contains__(searchSplitEntry):
                      found = False
-            if (postcode == markt.city.postcode and found): 
+            if (found): 
                 ll.append({ "id":markt.id , "name":markt.name, "adress":address,"waiting_queue_last_hour": str(markt.waiting_queue_last_hour)})
 
         if (len(ll) < fromPos or len(ll) == 0):
