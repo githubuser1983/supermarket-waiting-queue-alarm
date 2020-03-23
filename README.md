@@ -93,3 +93,6 @@ Running tests with py.test
 ```shell
   pytest  # BUG: CELERY_BROKER_URL is not available, Dominik 20-03-20
 ```
+
+# Importing Data from CSV
+docker-compose run django /app/importcsv.py
