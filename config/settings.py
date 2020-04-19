@@ -27,7 +27,7 @@ DEBUG = env.bool("DJANGO_DEBUG", False)
 DEBUG = False  # FIXME: in development only!
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = ["supermarket"]
+ALLOWED_HOSTS = ["*"]
 
 SECRET_KEY = env(
     "DJANGO_SECRET_KEY", default="DMlZ0uxPxD1!Lq7L*%3G&!bTWmD-(MfXU*UteDf)tcAFVFXXbU@Z$*TU9Rdj"

@@ -10,6 +10,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from rest_framework import status
+from datetime import datetime, timedelta
+from django.utils import timezone
+import csv
+from django.http import HttpResponse
 
 
 import json
@@ -17,6 +21,19 @@ from django.core.serializers.json import DjangoJSONEncoder
 
 from .models import Supermarket, City, Warn
 
+def some_view(request):
+    # Create the HttpResponse object with the appropriate CSV header.
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Warn Id', 'Timestamp', 'Supermarket Id', 'Name','Address','Postcode','City'])
+
+    data = Warn.objects.all()
+    for warning in data:
+        writer.writerow([warning.id,warning.timestamp,warning.supermarket.id, warning.supermarket.name, warning.supermarket.address,warning.supermarket.city.postcode,warning.supermarket.city.name])
+
+    return response
 
 class SupermarketList(ListView):
     model = Supermarket
@@ -55,10 +72,16 @@ class ReceiveSupermarketsFromQuery(APIView):
         if search is not None:
             searchSplit = search.lower().split()
 
+        this_hour = timezone.now() 
+        one_hour_later = this_hour + timedelta(hours=-1)
+
         markets = Supermarket.objects.filter(city__postcode=postcode)
+       
+        
         
         ll = []
         for markt in markets:
+            currentWarnings = Warn.objects.filter(timestamp__range=(one_hour_later,this_hour),supermarket__id=markt.id).count() #,) supermarket__id=market.id
             found = True
             address = markt.address+" "+str(markt.city.postcode)+" "+markt.city.name
             print(address)
@@ -69,7 +92,7 @@ class ReceiveSupermarketsFromQuery(APIView):
                     if not searchMarket.__contains__(searchSplitEntry):
                      found = False
             if (found): 
-                ll.append({ "id":markt.id , "name":markt.name, "adress":address,"waiting_queue_last_hour": str(markt.waiting_queue_last_hour)})
+                ll.append({ "id":markt.id , "name":markt.name, "adress":address,"waiting_queue_last_hour": str(currentWarnings)})
 
         if (len(ll) < fromPos or len(ll) == 0):
             return Response([])

@@ -12,6 +12,7 @@ urlpatterns = [
     url(r'^media/(?P<path>.*)$', serve,{'document_root': settings.MEDIA_ROOT}), 
     url(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),
     path("receivedata/", view=views.ReceiveSupermarketsFromQuery.as_view(), name="get"),
-    path('warn/<str:pk>/', view=views.WarningCreateView.as_view(), name="post")
+    path('warn/<str:pk>/', view=views.WarningCreateView.as_view(), name="post"),
+    path("export", view=views.some_view)
     
 ]
